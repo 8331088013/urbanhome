@@ -49,6 +49,10 @@ A full-stack Django web application for buying, selling, and renting properties.
 - **Form Validation**: Client and server-side validation
 - **Search & Filter**: Advanced query system
 
+## 🌐 Live Demo
+
+**Coming Soon!** This project will be deployed to a live server for demonstration.
+
 ## 🚀 Installation & Setup
 
 ### Prerequisites
@@ -92,6 +96,22 @@ python manage.py runserver
 ```
 
 Visit `http://127.0.0.1:8000/` to see the application.
+
+## 🖼️ Screenshots
+
+### Home Page
+![Home Page](screenshots/home.png)
+
+### Property Listings
+![Property Listings](screenshots/listings.png)
+
+### Property Details
+![Property Details](screenshots/property-detail.png)
+
+### User Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+*Note: Screenshots will be added after deployment*
 
 ## 📁 Project Structure
 
@@ -184,9 +204,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+**BUDIREDDY ATCHUTH KUMAR**
+- GitHub: [@8331088013](https://github.com/8331088013)
+- Location: Chittoor, India
+- Email: budireddyatchuthkumar@gmail.com
 
 ## 🙏 Acknowledgments
 

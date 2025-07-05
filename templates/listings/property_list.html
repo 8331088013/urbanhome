@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% block title %}Properties | UrbanHome{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Advanced Search Section -->
+  <div class="search-section">
+    <div class="container">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-search me-2"></i>Find Your Perfect Home</h5>
+        </div>
+        <div class="card-body">
+          <form method="get" class="row g-3">
+            <div class="col-md-3">
+              {{ search_form.search }}
+            </div>
+            <div class="col-md-2">
+              {{ search_form.property_type }}
+            </div>
+            <div class="col-md-2">
+              {{ search_form.bhk }}
+            </div>
+            <div class="col-md-2">
+              {{ search_form.furnished }}
+            </div>
+            <div class="col-md-1">
+              {{ search_form.min_price }}
+            </div>
+            <div class="col-md-1">
+              {{ search_form.max_price }}
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-light w-100" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-0">Found {{ properties_count }} Properties</h4>
+      <p class="text-muted mb-0">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results</p>
+    </div>
+    <div class="d-flex gap-2">
+      <select class="form-select" style="width: auto;" onchange="window.location.href=this.value">
+        <option value="?sort=-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+        <option value="?sort=price_low" {% if request.GET.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+        <option value="?sort=price_high" {% if request.GET.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+        <option value="?sort=rating" {% if request.GET.sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+      </select>
+      {% if user.is_authenticated %}
+        <a href="{% url 'listings:my_favorites' %}" class="btn btn-outline-primary">
+          <i class="fas fa-heart me-2"></i>My Favorites
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Properties Grid -->
+  <div class="row">
+    {% for property in page_obj %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card property-card h-100">
+        <div class="position-relative">
+          {% if property.main_image %}
+            <img src="{{ property.main_image.url }}" class="card-img-top" alt="Property image">
+          {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+              <i class="fas fa-home fa-3x text-muted"></i>
+            </div>
+          {% endif %}
+          
+          <!-- Favorite Button -->
+          {% if user.is_authenticated %}
+            <button class="btn btn-sm position-absolute top-0 end-0 m-2 favorite-btn" 
+                    data-property-id="{{ property.id }}"
+                    data-favorited="{% if property.id in user_favorites %}true{% else %}false{% endif %}">
+              <i class="fas fa-heart {% if property.id in user_favorites %}text-danger{% else %}text-white{% endif %}"></i>
+            </button>
+          {% endif %}
+          
+          <!-- Property Type Badge -->
+          <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+            {{ property.get_property_type_display }}
+          </span>
+        </div>
+        
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ property.title }}</h5>
+          <p class="property-location">
+            <i class="fas fa-map-marker-alt me-1"></i> {{ property.city }}, {{ property.area_name }}
+          </p>
+          
+          <!-- Property Details -->
+          <div class="property-features">
+            <div class="property-feature">
+              <div class="property-feature-value">{{ property.bhk }}</div>
+              <div class="property-feature-label">BHK</div>
+            </div>
+            <div class="property-feature">
+              <div class="property-feature-value">{{ property.area }} sq.ft</div>
+              <div class="property-feature-label">Area</div>
+            </div>
+            <div class="property-feature">
+              <div class="property-feature-value">₹{{ property.price }}</div>
+              <div class="property-feature-label">Price</div>
+            </div>
+          </div>
+          
+          <!-- Ratings -->
+          {% if property.avg_rating %}
+            <div class="mb-3">
+              <div class="d-flex align-items-center">
+                <div class="rating me-2">
+                  {% for i in "12345" %}
+                    <i class="fas fa-star{% if forloop.counter > property.avg_rating %}-o{% endif %}"></i>
+                  {% endfor %}
+                </div>
+                <small class="text-muted">({{ property.reviews_count }} reviews)</small>
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- Amenities Preview -->
+          {% if property.amenities %}
+            <div class="mb-3">
+              <small class="text-muted">Amenities:</small>
+              <div class="d-flex flex-wrap gap-1">
+                {% for amenity in property.amenities|slice:":3" %}
+                  <span class="badge bg-light text-dark">{{ amenity }}</span>
+                {% endfor %}
+                {% if property.amenities|length > 3 %}
+                  <span class="badge bg-light text-dark">+{{ property.amenities|length|add:"-3" }} more</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <div class="mt-auto">
+            <a href="{% url 'listings:detail' property.id %}" class="btn btn-primary w-100">
+              <i class="fas fa-eye me-2"></i>View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+        <h4>No properties found</h4>
+        <p class="text-muted">Try adjusting your search criteria or browse all properties</p>
+        <a href="{% url 'listings:list' %}" class="btn btn-primary">
+          <i class="fas fa-home me-2"></i>Browse All Properties
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+    <nav aria-label="Property pagination" class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+
+<!-- JavaScript for Interactive Features -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Favorite functionality
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const propertyId = this.dataset.propertyId;
+            const icon = this.querySelector('i');
+            
+            fetch(`/listings/property/${propertyId}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    icon.classList.remove('text-white');
+                    icon.classList.add('text-danger');
+                    this.dataset.favorited = 'true';
+                } else {
+                    icon.classList.remove('text-danger');
+                    icon.classList.add('text-white');
+                    this.dataset.favorited = 'false';
+                }
+                
+                // Show notification
+                showNotification(data.message, 'success');
+            })
+            .catch(error => {
+                showNotification('Error updating favorite', 'error');
+            });
+        });
+    });
+});
+
+function showNotification(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+.property-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.favorite-btn {
+    background: rgba(0,0,0,0.5);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorite-btn:hover {
+    background: rgba(0,0,0,0.7);
+}
+</style>
+{% endblock %} 

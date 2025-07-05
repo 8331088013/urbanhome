@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block title %}Add Property | UrbanHome{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header">
+          <h4 class="mb-0">Add New Property</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.errors %}
+              <div class="alert alert-danger">
+                <h6>Please correct the following errors:</h6>
+                {{ form.errors }}
+              </div>
+            {% endif %}
+
+            <!-- Property Details -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Property Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.property_type.id_for_label }}" class="form-label">Property Type *</label>
+                {{ form.property_type }}
+                {% if form.property_type.errors %}<div class="text-danger small">{{ form.property_type.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.description.id_for_label }}" class="form-label">Description *</label>
+              {{ form.description }}
+              {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.price.id_for_label }}" class="form-label">Price (₹) *</label>
+                {{ form.price }}
+                {% if form.price.errors %}<div class="text-danger small">{{ form.price.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.bhk.id_for_label }}" class="form-label">BHK *</label>
+                {{ form.bhk }}
+                {% if form.bhk.errors %}<div class="text-danger small">{{ form.bhk.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.area.id_for_label }}" class="form-label">Area (sq ft) *</label>
+                {{ form.area }}
+                {% if form.area.errors %}<div class="text-danger small">{{ form.area.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.furnished.id_for_label }}" class="form-label">Furnished Status *</label>
+                {{ form.furnished }}
+                {% if form.furnished.errors %}<div class="text-danger small">{{ form.furnished.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.bathrooms.id_for_label }}" class="form-label">Bathrooms *</label>
+                {{ form.bathrooms }}
+                {% if form.bathrooms.errors %}<div class="text-danger small">{{ form.bathrooms.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.balconies.id_for_label }}" class="form-label">Balconies</label>
+                {{ form.balconies }}
+                {% if form.balconies.errors %}<div class="text-danger small">{{ form.balconies.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.parking.id_for_label }}" class="form-label">Parking</label>
+                {{ form.parking }}
+                {% if form.parking.errors %}<div class="text-danger small">{{ form.parking.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <!-- Location Section -->
+            <h5 class="mt-4 mb-3">Location Details</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.country.id_for_label }}" class="form-label">Country *</label>
+                {{ form.country }}
+                {% if form.country.errors %}<div class="text-danger small">{{ form.country.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ form.state.id_for_label }}" class="form-label">State *</label>
+                {{ form.state }}
+                {% if form.state.errors %}<div class="text-danger small">{{ form.state.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.city.id_for_label }}" class="form-label">City *</label>
+                {{ form.city }}
+                {% if form.city.errors %}<div class="text-danger small">{{ form.city.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.town.id_for_label }}" class="form-label">Town</label>
+                {{ form.town }}
+                {% if form.town.errors %}<div class="text-danger small">{{ form.town.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="{{ form.village.id_for_label }}" class="form-label">Village</label>
+                {{ form.village }}
+                {% if form.village.errors %}<div class="text-danger small">{{ form.village.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.area_name.id_for_label }}" class="form-label">Area/Locality *</label>
+              {{ form.area_name }}
+              {% if form.area_name.errors %}<div class="text-danger small">{{ form.area_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.address.id_for_label }}" class="form-label">Full Address *</label>
+              {{ form.address }}
+              {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Select Location on Map</label>
+              <div id="map" style="height: 300px; border-radius: 1rem; margin-bottom: 1rem;"></div>
+              {{ form.latitude }}
+              {{ form.longitude }}
+              <small class="text-muted">Drag the marker to set the exact property location.</small>
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.pincode.id_for_label }}" class="form-label">Pincode *</label>
+              {{ form.pincode }}
+              {% if form.pincode.errors %}<div class="text-danger small">{{ form.pincode.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.main_image.id_for_label }}" class="form-label">Main Image</label>
+              {{ form.main_image }}
+              {% if form.main_image.errors %}<div class="text-danger small">{{ form.main_image.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">Add Property</button>
+              <a href="{% url 'listings:list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Map Picker Script (Leaflet.js for OpenStreetMap) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var latInput = document.getElementById('id_latitude');
+  var lngInput = document.getElementById('id_longitude');
+  var defaultLat = latInput.value || 20.5937;
+  var defaultLng = lngInput.value || 78.9629;
+  var map = L.map('map').setView([defaultLat, defaultLng], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+  var marker = L.marker([defaultLat, defaultLng], {draggable:true}).addTo(map);
+  marker.on('dragend', function(e) {
+    var latlng = marker.getLatLng();
+    latInput.value = latlng.lat.toFixed(6);
+    lngInput.value = latlng.lng.toFixed(6);
+  });
+  map.on('click', function(e) {
+    marker.setLatLng(e.latlng);
+    latInput.value = e.latlng.lat.toFixed(6);
+    lngInput.value = e.latlng.lng.toFixed(6);
+  });
+
+  // AJAX dynamic location dropdowns
+  function updateDropdown(url, param, value, targetId, emptyOption) {
+    fetch(url + '?' + param + '=' + value)
+      .then(response => response.json())
+      .then(data => {
+        var select = document.getElementById(targetId);
+        select.innerHTML = '';
+        var opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = emptyOption;
+        select.appendChild(opt);
+        data.forEach(function(item) {
+          var option = document.createElement('option');
+          option.value = item.id;
+          option.textContent = item.name;
+          select.appendChild(option);
+        });
+        // Trigger change event for cascading
+        select.dispatchEvent(new Event('change'));
+      });
+  }
+
+  var countrySelect = document.getElementById('id_country');
+  var stateSelect = document.getElementById('id_state');
+  var citySelect = document.getElementById('id_city');
+  var townSelect = document.getElementById('id_town');
+  var villageSelect = document.getElementById('id_village');
+
+  if (countrySelect) {
+    countrySelect.addEventListener('change', function() {
+      updateDropdown('/listings/ajax/get-states/', 'country_id', this.value, 'id_state', 'Select State');
+      citySelect.innerHTML = '<option value="">Select City</option>';
+      townSelect.innerHTML = '<option value="">Select Town</option>';
+      villageSelect.innerHTML = '<option value="">Select Village</option>';
+    });
+  }
+  if (stateSelect) {
+    stateSelect.addEventListener('change', function() {
+      updateDropdown('/listings/ajax/get-cities/', 'state_id', this.value, 'id_city', 'Select City');
+      townSelect.innerHTML = '<option value="">Select Town</option>';
+      villageSelect.innerHTML = '<option value="">Select Village</option>';
+    });
+  }
+  if (citySelect) {
+    citySelect.addEventListener('change', function() {
+      updateDropdown('/listings/ajax/get-towns/', 'city_id', this.value, 'id_town', 'Select Town');
+      villageSelect.innerHTML = '<option value="">Select Village</option>';
+    });
+  }
+  if (townSelect) {
+    townSelect.addEventListener('change', function() {
+      updateDropdown('/listings/ajax/get-villages/', 'town_id', this.value, 'id_village', 'Select Village');
+    });
+  }
+});
+</script>
+{% endblock %} 

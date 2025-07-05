@@ -1,0 +1,8 @@
+[
+  {"model": "listings.country", "pk": 1, "fields": {"name": "India", "code": "IN"}},
+  {"model": "listings.country", "pk": 2, "fields": {"name": "United States", "code": "US"}},
+  {"model": "listings.state", "pk": 1, "fields": {"name": "Maharashtra", "country": 1}},
+  {"model": "listings.state", "pk": 2, "fields": {"name": "Karnataka", "country": 1}},
+  {"model": "listings.state", "pk": 3, "fields": {"name": "California", "country": 2}},
+  {"model": "listings.state", "pk": 4, "fields": {"name": "Texas", "country": 2}}
+] 

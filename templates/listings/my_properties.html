@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}My Properties | UrbanHome{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">My Properties</h2>
+  <a href="{% url 'listings:add_property' %}" class="btn btn-primary mb-3">Add New Property</a>
+  <div class="row">
+    {% for property in properties %}
+    <div class="col-md-4 mb-4">
+      <div class="card bg-white text-dark h-100">
+        {% if property.main_image %}
+          <img src="{{ property.main_image.url }}" class="card-img-top" alt="Property image">
+        {% else %}
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+            <i class="fas fa-home fa-3x text-muted"></i>
+          </div>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ property.title }}</h5>
+          <p class="card-text">{{ property.city }}, {{ property.area_name }}<br>₹{{ property.price }}</p>
+          <a href="{% url 'listings:detail' property.id %}" class="btn btn-outline-primary btn-sm">View</a>
+          <a href="{% url 'listings:edit_property' property.id %}" class="btn btn-outline-warning btn-sm">Edit</a>
+          <a href="{% url 'listings:delete_property' property.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p>You have not listed any properties yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %} 

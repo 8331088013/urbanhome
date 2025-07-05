@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | UrbanHome{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <!-- Welcome Section -->
+    <div class="col-12 mb-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="mb-2">
+                <i class="fas fa-user-circle me-2"></i>Welcome back, {{ user.first_name|default:user.email }}!
+              </h2>
+              <p class="mb-0">Manage your properties, track inquiries, and stay updated with your real estate activities.</p>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="{% url 'listings:add_property' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-plus me-2"></i>Add Property
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="col-md-3 mb-4">
+      <div class="stat-card">
+        <i class="fas fa-home"></i>
+        <h3>{{ user_properties.count }}</h3>
+        <p>My Properties</p>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+      <div class="stat-card">
+        <i class="fas fa-heart"></i>
+        <h3>{{ user_favorites.count }}</h3>
+        <p>Favorites</p>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+      <div class="stat-card">
+        <i class="fas fa-comments"></i>
+        <h3>{{ received_messages.count }}</h3>
+        <p>Messages</p>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+      <div class="stat-card">
+        <i class="fas fa-eye"></i>
+        <h3>{{ total_views|default:0 }}</h3>
+        <p>Total Views</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'listings:add_property' %}" class="btn btn-primary">
+              <i class="fas fa-plus me-2"></i>Add New Property
+            </a>
+            <a href="{% url 'listings:my_properties' %}" class="btn btn-outline-primary">
+              <i class="fas fa-building me-2"></i>Manage Properties
+            </a>
+            <a href="{% url 'listings:my_favorites' %}" class="btn btn-outline-danger">
+              <i class="fas fa-heart me-2"></i>View Favorites
+            </a>
+            <a href="{% url 'listings:messages' %}" class="btn btn-outline-success">
+              <i class="fas fa-comments me-2"></i>Check Messages
+            </a>
+            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-user-edit me-2"></i>Edit Profile
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Properties -->
+    <div class="col-lg-8 mb-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-home me-2"></i>Recent Properties</h5>
+          <a href="{% url 'listings:my_properties' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+          {% if user_properties %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for property in user_properties|slice:":5" %}
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          {% if property.main_image %}
+                            <img src="{{ property.main_image.url }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                          {% else %}
+                            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                              <i class="fas fa-home text-muted"></i>
+                            </div>
+                          {% endif %}
+                          <div>
+                            <strong>{{ property.title }}</strong><br>
+                            <small class="text-muted">{{ property.city }}, {{ property.area_name }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-primary">{{ property.get_property_type_display }}</span>
+                      </td>
+                      <td>
+                        <strong class="text-primary">₹{{ property.price }}</strong>
+                      </td>
+                      <td>
+                        {% if property.is_active %}
+                          <span class="badge bg-success">Active</span>
+                        {% else %}
+                          <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <a href="{% url 'listings:detail' property.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <a href="{% url 'listings:edit_property' property.id %}" class="btn btn-outline-warning">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-home fa-3x text-muted mb-3"></i>
+              <h6>No properties yet</h6>
+              <p class="text-muted">Start by adding your first property!</p>
+              <a href="{% url 'listings:add_property' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Property
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Messages -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Recent Messages</h5>
+          <a href="{% url 'listings:messages' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+          {% if received_messages %}
+            <div class="list-group list-group-flush">
+              {% for message in received_messages|slice:":3" %}
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 {% if not message.is_read %}fw-bold{% endif %}">
+                        {% if not message.is_read %}
+                          <i class="fas fa-circle text-warning me-1" style="font-size: 8px;"></i>
+                        {% endif %}
+                        {{ message.subject }}
+                      </h6>
+                      <p class="mb-1 text-muted">{{ message.message|truncatechars:50 }}</p>
+                      <small class="text-muted">
+                        From: {{ message.sender.first_name|default:message.sender.email }}
+                      </small>
+                    </div>
+                    <small class="text-muted">{{ message.created_at|date:"M d" }}</small>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+              <h6>No messages yet</h6>
+              <p class="text-muted">When people contact you about properties, messages will appear here.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Favorites -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Recent Favorites</h5>
+          <a href="{% url 'listings:my_favorites' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+          {% if user_favorites %}
+            <div class="list-group list-group-flush">
+              {% for favorite in user_favorites|slice:":3" %}
+                <div class="list-group-item">
+                  <div class="d-flex align-items-center">
+                    {% if favorite.property.main_image %}
+                      <img src="{{ favorite.property.main_image.url }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="fas fa-home text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1">{{ favorite.property.title }}</h6>
+                      <p class="mb-1 text-muted">{{ favorite.property.city }}, {{ favorite.property.area_name }}</p>
+                      <strong class="text-primary">₹{{ favorite.property.price }}</strong>
+                    </div>
+                    <a href="{% url 'listings:detail' favorite.property.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+              <h6>No favorites yet</h6>
+              <p class="text-muted">Start exploring properties and add them to your favorites!</p>
+              <a href="{% url 'listings:list' %}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Browse Properties
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

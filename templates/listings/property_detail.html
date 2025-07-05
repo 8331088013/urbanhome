@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% block title %}{{ property.title }} | UrbanHome{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'listings:list' %}">Properties</a></li>
+      <li class="breadcrumb-item active">{{ property.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Property Images -->
+    <div class="col-lg-8">
+      <div class="card bg-dark text-light mb-4">
+        <div class="position-relative">
+          {% if property.main_image %}
+            <img src="{{ property.main_image.url }}" class="card-img-top" alt="Property image" style="height: 400px; object-fit: cover;">
+          {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 400px;">
+              <i class="fas fa-home fa-5x text-muted"></i>
+            </div>
+          {% endif %}
+          
+          <!-- Favorite Button -->
+          {% if user.is_authenticated %}
+            <button class="btn btn-lg position-absolute top-0 end-0 m-3 favorite-btn" 
+                    data-property-id="{{ property.id }}"
+                    data-favorited="{% if is_favorited %}true{% else %}false{% endif %}">
+              <i class="fas fa-heart {% if is_favorited %}text-danger{% else %}text-white{% endif %} fa-2x"></i>
+            </button>
+          {% endif %}
+          
+          <!-- Property Type Badge -->
+          <span class="badge bg-primary position-absolute top-0 start-0 m-3 fs-6">
+            {{ property.get_property_type_display }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Property Info -->
+    <div class="col-lg-4">
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-header bg-primary">
+          <h4 class="mb-0">₹{{ property.price }}</h4>
+          <small class="text-light">{{ property.get_property_type_display }}</small>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ property.title }}</h5>
+          <p class="text-muted">
+            <i class="fas fa-map-marker-alt me-2"></i>{{ property.city }}, {{ property.area_name }}
+          </p>
+          
+          <!-- Quick Stats -->
+          <div class="row text-center mb-3">
+            <div class="col-4">
+              <div class="border-end">
+                <strong>{{ property.bhk }}</strong><br>
+                <small class="text-muted">BHK</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border-end">
+                <strong>{{ property.area }} sq.ft</strong><br>
+                <small class="text-muted">Area</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <strong>{{ property.bathrooms }}</strong><br>
+              <small class="text-muted">Bath</small>
+            </div>
+          </div>
+          
+          <!-- Ratings -->
+          {% if property.get_average_rating %}
+            <div class="mb-3">
+              <div class="d-flex align-items-center">
+                <div class="text-warning me-2">
+                  {% for i in "12345" %}
+                    <i class="fas fa-star{% if forloop.counter > property.get_average_rating %}-o{% endif %}"></i>
+                  {% endfor %}
+                </div>
+                <span class="text-muted">({{ property.reviews.count }} reviews)</span>
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- Action Buttons -->
+          <div class="d-grid gap-2">
+            {% if user.is_authenticated and user != property.owner %}
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#messageModal">
+                <i class="fas fa-comment me-2"></i>Contact Owner
+              </button>
+            {% endif %}
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+              <i class="fas fa-phone me-2"></i>Request Callback
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Property Details -->
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Detailed Information -->
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Property Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><strong>Property Type:</strong> {{ property.get_property_type_display }}</li>
+                <li class="mb-2"><strong>BHK:</strong> {{ property.bhk }}</li>
+                <li class="mb-2"><strong>Area:</strong> {{ property.area }} sq.ft</li>
+                <li class="mb-2"><strong>Furnished:</strong> {{ property.get_furnished_display }}</li>
+                <li class="mb-2"><strong>Bathrooms:</strong> {{ property.bathrooms }}</li>
+                <li class="mb-2"><strong>Balconies:</strong> {{ property.balconies }}</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><strong>Parking:</strong> {% if property.parking %}Yes{% else %}No{% endif %}</li>
+                {% if property.floor_number %}
+                  <li class="mb-2"><strong>Floor:</strong> {{ property.floor_number }}{% if property.total_floors %}/{{ property.total_floors }}{% endif %}</li>
+                {% endif %}
+                {% if property.age_of_property %}
+                  <li class="mb-2"><strong>Age:</strong> {{ property.age_of_property }} years</li>
+                {% endif %}
+                <li class="mb-2"><strong>Posted:</strong> {{ property.created_at|date:"M d, Y" }}</li>
+                <li class="mb-2"><strong>Owner:</strong> {{ property.owner.first_name|default:property.owner.email }}</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Description -->
+          <div class="mt-4">
+            <h6>Description</h6>
+            <p>{{ property.description }}</p>
+          </div>
+          
+          <!-- Amenities -->
+          {% if property.amenities %}
+            <div class="mt-4">
+              <h6>Amenities</h6>
+              <div class="d-flex flex-wrap gap-2">
+                {% for amenity in property.amenities %}
+                  <span class="badge bg-secondary">{{ amenity }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- Virtual Tour -->
+          {% if property.virtual_tour_url %}
+            <div class="mt-4">
+              <h6>Virtual Tour</h6>
+              <a href="{{ property.virtual_tour_url }}" target="_blank" class="btn btn-outline-primary">
+                <i class="fas fa-vr-cardboard me-2"></i>Take Virtual Tour
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-star me-2"></i>Reviews</h5>
+          {% if user.is_authenticated %}
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
+              <i class="fas fa-plus me-1"></i>Add Review
+            </button>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          {% if reviews %}
+            {% for review in reviews %}
+              <div class="border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <div class="text-warning mb-1">
+                      {% for i in "12345" %}
+                        <i class="fas fa-star{% if forloop.counter > review.rating %}-o{% endif %}"></i>
+                      {% endfor %}
+                    </div>
+                    <strong>{{ review.user.first_name|default:review.user.email }}</strong>
+                    <small class="text-muted ms-2">{{ review.created_at|date:"M d, Y" }}</small>
+                  </div>
+                </div>
+                <p class="mb-0 mt-2">{{ review.comment }}</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted text-center py-3">No reviews yet. Be the first to review this property!</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Owner Info -->
+      <div class="card bg-dark text-light mb-4">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="fas fa-user me-2"></i>Property Owner</h6>
+        </div>
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-user-circle fa-3x text-muted"></i>
+          </div>
+          <h6>{{ property.owner.first_name|default:property.owner.email }}</h6>
+          <small class="text-muted">Member since {{ property.owner.date_joined|date:"M Y" }}</small>
+        </div>
+      </div>
+
+      <!-- Similar Properties -->
+      {% if related_properties %}
+        <div class="card bg-dark text-light">
+          <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-home me-2"></i>Similar Properties</h6>
+          </div>
+          <div class="card-body">
+            {% for prop in related_properties %}
+              <div class="d-flex mb-3">
+                {% if prop.main_image %}
+                  <img src="{{ prop.main_image.url }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                {% else %}
+                  <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-home text-muted"></i>
+                  </div>
+                {% endif %}
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ prop.title }}</h6>
+                  <p class="text-muted mb-1">{{ prop.city }}, {{ prop.area_name }}</p>
+                  <strong class="text-primary">₹{{ prop.price }}</strong>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Message Modal -->
+{% if user.is_authenticated and user != property.owner %}
+<div class="modal fade" id="messageModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Send Message to Owner</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Subject</label>
+            {{ message_form.subject }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            {{ message_form.message }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" name="message" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Request Callback</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            {{ contact_form.name }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            {{ contact_form.email }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            {{ contact_form.phone }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            {{ contact_form.message }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" name="contact" class="btn btn-primary">Send Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+{% if user.is_authenticated %}
+<div class="modal fade" id="reviewModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Review</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Rating</label>
+            {{ review_form.rating }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Comment</label>
+            {{ review_form.comment }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" name="review" class="btn btn-primary">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- JavaScript for Interactive Features -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Favorite functionality
+    const favoriteBtn = document.querySelector('.favorite-btn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', function() {
+            const propertyId = this.dataset.propertyId;
+            const icon = this.querySelector('i');
+            
+            fetch(`/listings/property/${propertyId}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    icon.classList.remove('text-white');
+                    icon.classList.add('text-danger');
+                    this.dataset.favorited = 'true';
+                } else {
+                    icon.classList.remove('text-danger');
+                    icon.classList.add('text-white');
+                    this.dataset.favorited = 'false';
+                }
+                
+                showNotification(data.message, 'success');
+            })
+            .catch(error => {
+                showNotification('Error updating favorite', 'error');
+            });
+        });
+    }
+});
+
+function showNotification(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+.favorite-btn {
+    background: rgba(0,0,0,0.5);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorite-btn:hover {
+    background: rgba(0,0,0,0.7);
+}
+</style>
+{% endblock %} 
